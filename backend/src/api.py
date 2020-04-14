@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, abort
 from sqlalchemy import exc
 import json
 from flask_cors import CORS
+from sqlalchemy.exc import SQLAlchemyError
 
 from .database.models import db_drop_and_create_all, setup_db, Drink
 from .auth.auth import AuthError, requires_auth
@@ -16,7 +17,7 @@ CORS(app)
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 ## ROUTES
 '''
@@ -27,6 +28,16 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks')
+def get_drinks():
+    drinks = Drink.query.all()
+    print(drinks)
+    drinks_formatted = [d.short() for d in drinks]
+    return jsonify({
+        "success": True,
+        "drinks": drinks_formatted
+    })
+    
 
 
 '''
@@ -48,6 +59,27 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+
+@app.route('/drinks', methods=["POST"])
+@requires_auth('post:drinks')
+def add_drinks(jwt):
+    body = request.get_json()
+    title = body['title']
+    print("title: ", title)
+    recipe = body['recipe']
+    print("recipe: ", recipe)
+    drink = Drink(title=title, recipe=json.dumps(recipe))
+    try:
+        drink.insert()
+    except SQLAlchemyError as e:
+        print(e)
+        print("could not add new drink")
+        abort(422)
+    return jsonify({
+        "success": True,
+        "drinks": drink.long()
+    })
+
 
 
 '''

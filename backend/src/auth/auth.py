@@ -24,14 +24,28 @@ class AuthError(Exception):
 
 def get_token_auth_header():
     if 'Authorization' not in request.headers:
+        raise AuthError({
+                'code': 'unauthorized',
+                'description': 'Unauthorized.'
+            }, 401)
         abort(401)
 
     auth_header = request.headers['Authorization']
     header_parts = auth_header.split(' ')
 
     if len(header_parts) != 2:
+        raise AuthError({
+                'code': 'unauthorized',
+                'description': 'Unauthorized.'
+            }, 401)
+        abort(401)
         abort(401)
     elif header_parts[0].lower() != 'bearer':
+        raise AuthError({
+                'code': 'unauthorized',
+                'description': 'Unauthorized.'
+            }, 401)
+        abort(401)
         abort(401)
 
     return header_parts[1]
@@ -39,9 +53,17 @@ def get_token_auth_header():
 
 def check_permissions(permission, payload):
     if 'permissions' not in payload:
+        raise AuthError({
+                'code': 'bad-request',
+                'description': 'Bad request.'
+            }, 400)
         abort(400)
     
     if permission not in payload['permissions']:
+        raise AuthError({
+                'code': 'forbidden',
+                'description': 'Forbidden.'
+            }, 403)
         abort(403)
 
     return True
