@@ -1,5 +1,5 @@
 import json
-from flask import request, _request_ctx_stack, abort
+from flask import request, _request_ctx_stack
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
@@ -24,15 +24,27 @@ class AuthError(Exception):
 
 def get_token_auth_header():
     if 'Authorization' not in request.headers:
-        abort(401)
+        print("No authorization info found!")
+        raise AuthError({
+                'code': 'invalid_header',
+                'description': 'No authorization info found.'
+            }, 401)
 
     auth_header = request.headers['Authorization']
     header_parts = auth_header.split(' ')
 
     if len(header_parts) != 2:
-        abort(401)
+        print("Bad header data!")
+        raise AuthError({
+                'code': 'invalid_header',
+                'description': 'Invalid header data.'
+            }, 401)
     elif header_parts[0].lower() != 'bearer':
-        abort(401)
+        print("Bad authorization type!")
+        raise AuthError({
+                'code': 'wrong_authorization_type',
+                'description': 'Wrong authorization type.'
+            }, 401)
 
 
     return header_parts[1]
@@ -40,10 +52,18 @@ def get_token_auth_header():
 
 def check_permissions(permission, payload):
     if 'permissions' not in payload:
-        abort(401)
+        print("permissions not in payload!")
+        raise AuthError({
+                'code': 'no_permission_data',
+                'description': 'No permission in token.'
+            }, 401)
     
     if permission not in payload['permissions']:
-        abort(401)
+        print(permission, "not in permissions!")
+        raise AuthError({
+                'code': 'missing_permission',
+                'description': 'User does not have permission to view this data.'
+            }, 401)
 
     return True
 
