@@ -115,6 +115,24 @@ def add_drinks(jwt):
         or appropriate status code indicating reason for failure
 '''
 
+@app.route('/drinks/<int:drink_id>', methods=["DELETE"])
+@requires_auth('delete:drinks')
+def delete_drinks(jwt, drink_id):
+    error = False
+    try:
+        drink = Drink.query.filter_by(id=drink_id).one_or_none()
+        drink.delete()
+    except SQLAlchemyError as e:
+        error = True
+        print(e)
+        print("could not delete drink")
+        abort(422)
+    success = False if error else True
+    return jsonify({
+        "success": success,
+        "delete": drink_id
+    })
+
 
 ## Error Handling
 '''
