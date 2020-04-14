@@ -69,7 +69,7 @@ def modify_drinks(jwt, drink_id):
         if 'title' in body:
             drink.title = body['title']
         if 'recipe' in body:
-            drink.recipe = body['recipe']
+            drink.recipe = json.dumps(body['recipe'])
         drink.update()
     except SQLAlchemyError as e:
         error = True
