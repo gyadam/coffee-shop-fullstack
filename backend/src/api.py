@@ -102,7 +102,28 @@ def add_drinks(jwt):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
-
+@app.route('/drinks/<int:drink_id>', methods=["PATCH"])
+@requires_auth('patch:drinks')
+def modify_drinks(jwt, drink_id):
+    error = False
+    body = request.get_json()
+    try:
+        drink = Drink.query.filter_by(id=drink_id).one_or_none()
+        if 'title' in body:
+            drink.title = body['title']
+        if 'recipe' in body:
+            drink.recipe = body['recipe']
+        drink.update()
+    except SQLAlchemyError as e:
+        error = True
+        print(e)
+        print("could not modify drink")
+        abort(422)
+    success = False if error else True
+    return jsonify({
+        "success": success,
+        "drinks": [drink.long()]
+    })
 
 '''
 @TODO implement endpoint
