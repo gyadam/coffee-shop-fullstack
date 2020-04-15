@@ -91,25 +91,25 @@ def delete_drinks(jwt, drink_id):
 @app.errorhandler(422)
 def unprocessable(error):
     return jsonify({
-                    "success": False,
-                    "error": 422,
-                    "message": "unprocessable"
-                    }), 422
+        "success": False,
+        "error": 422,
+        "message": "unprocessable"
+        }), 422
 
 
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({
-                    "success": False,
-                    "error": 404,
-                    "message": "resource not found"
-                    }), 404
+        "success": False,
+        "error": 404,
+        "message": "resource not found"
+        }), 404
 
 
 @app.errorhandler(AuthError)
 def authorization_error(error):
     return jsonify({
-                    "success": False,
-                    "error": 401,
-                    "message": "authorization error"
-                    }), 401
+        "success": False,
+        "error": 401,
+        "message": "authorization error"
+        }), 401
