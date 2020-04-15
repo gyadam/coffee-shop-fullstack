@@ -19,7 +19,6 @@ db_drop_and_create_all()
 @app.route('/drinks')
 def get_drinks():
     drinks = Drink.query.all()
-    print(drinks)
     drinks_formatted = [d.short() for d in drinks]
     return jsonify({
         "success": True,
@@ -43,15 +42,11 @@ def get_drinks_details(jwt):
 def add_drinks(jwt):
     body = request.get_json()
     title = body['title']
-    print("title: ", title)
     recipe = body['recipe']
-    print("recipe: ", recipe)
     drink = Drink(title=title, recipe=json.dumps(recipe))
     try:
         drink.insert()
-    except SQLAlchemyError as e:
-        print(e)
-        print("could not add new drink")
+    except SQLAlchemyError:
         abort(422)
     return jsonify({
         "success": True,
@@ -62,7 +57,6 @@ def add_drinks(jwt):
 @app.route('/drinks/<int:drink_id>', methods=["PATCH"])
 @requires_auth('patch:drinks')
 def modify_drinks(jwt, drink_id):
-    error = False
     body = request.get_json()
     try:
         drink = Drink.query.filter_by(id=drink_id).one_or_none()
@@ -71,14 +65,10 @@ def modify_drinks(jwt, drink_id):
         if 'recipe' in body:
             drink.recipe = json.dumps(body['recipe'])
         drink.update()
-    except SQLAlchemyError as e:
-        error = True
-        print(e)
-        print("could not modify drink")
+    except SQLAlchemyError:
         abort(422)
-    success = False if error else True
     return jsonify({
-        "success": success,
+        "success": True,
         "drinks": [drink.long()]
     })
 
@@ -86,18 +76,13 @@ def modify_drinks(jwt, drink_id):
 @app.route('/drinks/<int:drink_id>', methods=["DELETE"])
 @requires_auth('delete:drinks')
 def delete_drinks(jwt, drink_id):
-    error = False
     try:
         drink = Drink.query.filter_by(id=drink_id).one_or_none()
         drink.delete()
-    except SQLAlchemyError as e:
-        error = True
-        print(e)
-        print("could not delete drink")
+    except SQLAlchemyError:
         abort(422)
-    success = False if error else True
     return jsonify({
-        "success": success,
+        "success": True,
         "delete": drink_id
     })
 
