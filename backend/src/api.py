@@ -14,8 +14,8 @@ CORS(app)
 
 db_drop_and_create_all()
 
-## ROUTES
 
+# ROUTES
 @app.route('/drinks')
 def get_drinks():
     drinks = Drink.query.all()
@@ -24,7 +24,7 @@ def get_drinks():
         "success": True,
         "drinks": drinks_formatted
     })
-    
+
 
 @app.route('/drinks-detail')
 @requires_auth('get:drinks-detail')
@@ -35,7 +35,7 @@ def get_drinks_details(jwt):
         "success": True,
         "drinks": drinks_formatted
     })
-    
+
 
 @app.route('/drinks', methods=["POST"])
 @requires_auth('post:drinks')
@@ -87,12 +87,11 @@ def delete_drinks(jwt, drink_id):
     })
 
 
-## Error Handling
-
+# Error Handling
 @app.errorhandler(422)
 def unprocessable(error):
     return jsonify({
-                    "success": False, 
+                    "success": False,
                     "error": 422,
                     "message": "unprocessable"
                     }), 422
@@ -101,7 +100,7 @@ def unprocessable(error):
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({
-                    "success": False, 
+                    "success": False,
                     "error": 404,
                     "message": "resource not found"
                     }), 404
@@ -110,7 +109,7 @@ def not_found(error):
 @app.errorhandler(AuthError)
 def authorization_error(error):
     return jsonify({
-                    "success": False, 
+                    "success": False,
                     "error": 401,
                     "message": "authorization error"
                     }), 401

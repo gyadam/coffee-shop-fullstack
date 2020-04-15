@@ -9,19 +9,15 @@ AUTH0_DOMAIN = 'coffeeshop-gyadam.auth0.com'
 ALGORITHMS = ['RS256']
 API_AUDIENCE = 'drinks'
 
-## AuthError Exception
-'''
-AuthError Exception
-A standardized way to communicate auth failure modes
-'''
+
+# AuthError Exception
 class AuthError(Exception):
     def __init__(self, error, status_code):
         self.error = error
         self.status_code = status_code
 
 
-## Auth Header
-
+# Auth Header
 def get_token_auth_header():
     if 'Authorization' not in request.headers:
         print("No authorization info found!")
@@ -45,8 +41,6 @@ def get_token_auth_header():
                 'code': 'wrong_authorization_type',
                 'description': 'Wrong authorization type.'
             }, 401)
-
-
     return header_parts[1]
 
 
@@ -57,12 +51,12 @@ def check_permissions(permission, payload):
                 'code': 'no_permission_data',
                 'description': 'No permission in token.'
             }, 401)
-    
+
     if permission not in payload['permissions']:
         print(permission, "not in permissions!")
         raise AuthError({
                 'code': 'missing_permission',
-                'description': 'User does not have permission to view this data.'
+                'description': 'No permission to view this data.'
             }, 401)
 
     return True
@@ -72,10 +66,10 @@ def verify_decode_jwt(token):
     # GET THE PUBLIC KEY FROM AUTH0
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
     jwks = json.loads(jsonurl.read())
-    
+
     # GET THE DATA IN THE HEADER
     unverified_header = jwt.get_unverified_header(token)
-    
+
     # CHOOSE OUR KEY
     rsa_key = {}
     if 'kid' not in unverified_header:
@@ -115,7 +109,7 @@ def verify_decode_jwt(token):
         except jwt.JWTClaimsError:
             raise AuthError({
                 'code': 'invalid_claims',
-                'description': 'Incorrect claims. Please, check the audience and issuer.'
+                'description': 'Incorrect claims. Check audience and issuer.'
             }, 401)
         except Exception:
             raise AuthError({
